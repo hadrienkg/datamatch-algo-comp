@@ -160,7 +160,38 @@ bool try_propose(const int proposer,
                         int* cur_poss,
                         const int ucount, 
                         std::set<int>* match_sets) {
-    // TODO
+    int score;
+    int candidate;
+    int preference = cur_poss[proposer];
+    // iterates through a proposer's preference list
+    while (preference < ucount) {
+        candidate = sorted_indices[proposer][preference];
+        score = scores[proposer][candidate];
+
+        // moves to next candidate if score is -1 or proposer == candidate
+        if (score == -1 || proposer == candidate) {
+            continue;
+        }
+
+        // attempts to make a match if not already matched
+        if (!matched[proposer][candidate]) {
+            // makes match if candidate has capacity
+            if (match_sets[candidate].size() < iter) {
+                addmatch(proposer, candidate, matched, match_sets);
+                return true;
+            }   
+            // attempts to replace worst partner if candidate is at capacity
+            else {
+                int worst_partner = find_worst_partner(candidate, scores, match_sets);
+                if (score > scores[proposer][worst_partner]) {
+                    removematch(worst_partner, candidate, matched, match_sets);
+                    addmatch(proposer, candidate, matched, match_sets);
+                    return true;
+                }
+            }
+        }
+        preference++;
+    }
     return false;
 }
 
@@ -179,8 +210,26 @@ void make_matches(const int target,
                   int* cur_poss,
                   const int ucount,
                   std::set<int>* match_sets) {
+    for(int iter = 1; iter <= target; iter++) {
+        // reset cur_poss at start of each iteration
+        for (int i = 0; i < ucount; i++) {
+            cur_poss[i] = 0;
+        }
 
-    // TODO
+        bool change;
+        // continue proposing until no changes occur
+        do {
+            change = false;
+            for (int proposer = 0; proposer < ucount; proposer++) {
+                if (match_sets[proposer].size() < iter) {
+                    bool proposed = try_propose(proposer, iter, sorted_indices, scores, matched, cur_poss, ucount, match_sets);
+                    if (proposed) {
+                        change = true;
+                    }
+                }
+            }
+        } while (change);
+    }
     return;
 }
 
