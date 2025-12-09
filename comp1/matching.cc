@@ -170,27 +170,38 @@ bool try_propose(const int proposer,
 
         // moves to next candidate if score is -1 or proposer == candidate
         if (score == -1 || proposer == candidate) {
+            preference++;
+            cur_poss[proposer] = preference;
             continue;
         }
 
-        // attempts to make a match if not already matched
-        if (!matched[proposer][candidate]) {
-            // makes match if candidate has capacity
-            if (match_sets[candidate].size() < iter) {
+        // skip if already matched
+        if (matched[proposer][candidate]) {
+            preference++;
+            cur_poss[proposer] = preference;
+            continue;
+        }
+
+        // makes match if candidate has capacity
+        if (match_sets[candidate].size() < iter) {
+            addmatch(proposer, candidate, matched, match_sets);
+            cur_poss[proposer] = preference + 1;
+            return true;
+        }   
+        // attempts to replace worst partner if candidate is at capacity
+        else {
+            int worst_partner = find_worst_partner(candidate, scores, match_sets);
+            if (scores[candidate][proposer] > scores[candidate][worst_partner]) {
+                removematch(worst_partner, candidate, matched, match_sets);
                 addmatch(proposer, candidate, matched, match_sets);
+                cur_poss[proposer] = preference + 1;
                 return true;
-            }   
-            // attempts to replace worst partner if candidate is at capacity
-            else {
-                int worst_partner = find_worst_partner(candidate, scores, match_sets);
-                if (score > scores[proposer][worst_partner]) {
-                    removematch(worst_partner, candidate, matched, match_sets);
-                    addmatch(proposer, candidate, matched, match_sets);
-                    return true;
-                }
             }
         }
+        
+        // Proposal was rejected, move to next candidate
         preference++;
+        cur_poss[proposer] = preference;
     }
     return false;
 }

@@ -111,16 +111,40 @@ bool is_cheating(const User& u1, const User& u2, std::size_t nquestions,
 ///     criteria specified in the README.
 
 bool check_compatibility(const User& u1, const User& u2) {
-    // TODO
-    return false;
+    if (u1.id == u2.id) return false;
+
+    if (u1.college != u2.college) return false;
+    
+    if (get_match_type(u1, u2) == MatchType::NEITHER) return false;
+
+    if (get_crush_type(u1, u2) == Crush::MUTUAL) return true;
+
+    if (std::abs(u1.year - u2.year) > YEAR_DIFF_MAX) return false;
+
+    if (u1.min_compatible_age && u2.age < *u1.min_compatible_age) return false;
+    if (u1.max_compatible_age && u2.age > *u1.max_compatible_age) return false;
+    if (u2.min_compatible_age && u1.age < *u2.min_compatible_age) return false;
+    if (u2.max_compatible_age && u1.age > *u2.max_compatible_age) return false;
+
+    if (u1.no_house_matches || u2.no_house_matches) {
+        if (to_upper(u1.house) == to_upper(u2.house)) return false;
+    }
+
+    for (std::string blocked_house : u1.blocked_houses) {
+        if (to_upper(blocked_house) == to_upper(u2.house)) return false;
+    }
+    for (std::string blocked_house : u2.blocked_houses) {
+        if (to_upper(blocked_house) == to_upper(u1.house)) return false;
+    }
+
+    return true;
 }
 
 /// bonus(u1, u2):
 ///    Implement this according to the README instructions.
 
 float bonus(const User& u1, const User& u2) {
-    // TODO
-    return 0.0f;
+    return get_crush_type(u1, u2) == Crush::MUTUAL ? 0.5f : 0.0f;
 }
 
 /// ================================

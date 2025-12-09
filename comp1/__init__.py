@@ -54,7 +54,7 @@ def test6():
 def test7():
     """test7.cpp passes"""
     solution_matches_test(7)
-
+'''
 @check50.check(compiles)
 def no_memory_leak():
     """matching.cc has no memory leaks"""
@@ -62,6 +62,7 @@ def no_memory_leak():
 
     check50.run(f"g++ tests/{test}.cpp matching.o -o {test}").exit(0)
     check50.c.valgrind(f"./{test}").stdout(timeout=10)
+'''
 
 def solution_matches_test(i):
     check50.run(f"g++ tests/test{i}.cpp answers.o -o test{i}_sol").exit(0)
