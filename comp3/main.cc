@@ -363,6 +363,17 @@ int main(int argc, char** argv) {
 
         /// TODO: Make noDormMatch logic here. You can make helper functions if
         /// you want.
+        logger.log(INFO, "Prevent same-dorm matching");
+        for (size_t i = 0; i < tucount; ++i) {
+            for (size_t j = 0; j < tucount; ++j) {
+                if (users[i].no_house_matches == true && users[i].house == users[j].house) {
+                    weights[i][j] = -1;
+                    weights[j][i] = -1;
+                    matchtypes[i][j] = -1;
+                    matchtypes[j][i] = -1;
+                }
+            }
+        }
 
         logger.log(INFO, "Computing scores");
         std::unordered_map<std::string, std::string> cross_schools; // empty
